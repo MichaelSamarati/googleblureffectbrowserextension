@@ -58,7 +58,6 @@ body {
   animation: move-border-animation var(--move-time);
   animation-iteration-count: var(--animation-iteration-count);
   animation-timing-function: var(--animation-timing-function);
-  z-index: 5;
 }
 
 @keyframes move-animation {
