@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Google Background Blur Animation",
+  "version": "0.1.0",
+  "icons": {
+    "16": "./img/icon16.png",
+    "48": "./img/icon48.png",
+    "128": "./img/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.google.com/",
+        "https://www.google.de/",
+        "https://www.google.at/"
+      ],
+      "js": ["script.js"],
+      "css": ["style.css"]
+    }
+  ]
+}

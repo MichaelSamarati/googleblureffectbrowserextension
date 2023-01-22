@@ -1,0 +1,142 @@
+:root {
+  --marginX: 17vw;
+  --marginY: 21vh;
+  --size: 300px;
+  --half-size: calc(var(--size)/2);
+  --move-time: 5000ms;
+  --blur: 5px;
+  --border-width: 6px;
+  --animation-timing-function: ease;
+  --animation-iteration-count: 1;
+
+  --clip-path-circle-radius: var(--half-size);
+  --clip-path-left: var(--marginX);
+  --clip-path-right: calc(100vw - var(--marginX));
+  --clip-path-top: var(--marginY);
+  --clip-path-bottom: calc(100vh - var(--marginY));
+
+  --border-left-translate: calc(var(--marginX) - var(--half-size) - var(--border-width));
+  --border-right-translate: calc(100vw - var(--marginX) - var(--half-size) - var(--border-width));
+  --border-top-translate: calc(var(--marginY) - var(--half-size) - var(--border-width));
+  --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width));
+}
+
+body {
+  overflow: hidden;
+}
+
+.no-blur {
+  filter: none;
+}
+
+.no-select {
+  user-select: none;
+}
+
+.random-background-image-blur {
+  filter: blur(var(--blur));
+}
+
+.random-background-image-normal {
+  clip-path: circle(100% at var(--clip-path-left) var(--clip-path-top));
+  animation: move-animation var(--move-time);
+  animation-iteration-count: var(--animation-iteration-count);
+  animation-timing-function: var(--animation-timing-function);
+}
+
+.random-background-image-normal-border {
+  width: 6000px;
+  height: 6000px;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  border-style: groove;
+  border-color: rgb(0, 0, 0, 0.9);
+  border-width: var(--border-width);
+  border-radius: 50%;
+  animation: move-border-animation var(--move-time);
+  animation-iteration-count: var(--animation-iteration-count);
+  animation-timing-function: var(--animation-timing-function);
+  z-index: 5;
+}
+
+@keyframes move-animation {
+  0% {
+    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
+  }
+
+  25% {
+    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-right) var(--clip-path-top));
+  }
+
+  50% {
+    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-right) var(--clip-path-bottom));
+  }
+
+  75% {
+    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-bottom));
+  }
+
+  100% {
+    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
+  }
+}
+
+@keyframes move-border-animation {
+  0% {
+    width: var(--size);
+    height: var(--size);
+    top: 0;
+    left: 0;
+    transform: translate(var(--border-left-translate), var(--border-top-translate));
+  }
+
+  25% {
+    transform: translate(var(--border-right-translate), var(--border-top-translate));
+  }
+
+  50% {
+    transform: translate(var(--border-right-translate), var(--border-bottom-translate));
+  }
+
+  75% {
+    transform: translate(var(--border-left-translate), var(--border-bottom-translate));
+  }
+
+  100% {
+    width: var(--size);
+    height: var(--size);
+    top: 0;
+    left: 0;
+    transform: translate(var(--border-left-translate), var(--border-top-translate));
+  }
+}
+
+@keyframes scale-animation {
+  0% {
+    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
+  }
+
+  100% {
+    clip-path: circle(var(--clip-path-circle-radius)*7 at center);
+  }
+}
+
+@keyframes scale-border-animation {
+  0% {
+    width: var(--size);
+    height: var(--size);
+    top: 0;
+    left: 0;
+    transform: translate(var(--border-left-translate), var(--border-top-translate));
+  }
+
+  100% {
+    width: 6000px;
+    height: 6000px;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+  }
+}
