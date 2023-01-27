@@ -13,13 +13,21 @@ function run() {
     startScaleAnimation(e)
   );
   function startScaleAnimation(e) {
+    /*this would start the aniation of scale but it is bugged
     let time = "2000ms";
     newDiv.classList.add("no-click");
+
+    newDiv.style.animation = "scale-border-animation";
+    newDiv.style.animationDuration = time;
+    */
+    
+    
+    
+    
+    
     // imageNormalElement.style.animation = "scale-animation";
     // imageNormalElement.style.animationDuration = time;
     // imageNormalElement.classList.add(".clip-path-animation");
-    newDiv.style.animation = "scale-border-animation";
-    newDiv.style.animationDuration = time;
     // imageNormalElement.style.animation = "scale-animation";
     // imageNormalElement.style.animationDuration = time;
     // let start = null;
