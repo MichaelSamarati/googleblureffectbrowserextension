@@ -33,6 +33,10 @@ body {
   user-select: none;
 }
 
+.no-click {
+  pointer-events: none;
+}
+
 .random-background-image-blur {
   filter: blur(var(--blur));
 }

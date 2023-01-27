@@ -14,6 +14,7 @@ function run() {
   );
   function startScaleAnimation(e) {
     let time = "2000ms";
+    newDiv.classList.add("no-click");
     // imageNormalElement.style.animation = "scale-animation";
     // imageNormalElement.style.animationDuration = time;
     // imageNormalElement.classList.add(".clip-path-animation");
