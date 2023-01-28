@@ -7,7 +7,7 @@
   --blur: 5px;
   --border-width: 6px;
   --animation-timing-function: ease;
-  --animation-iteration-count: 1;
+  --animation-iteration-count: infinite;
 
   --clip-path-circle-radius: var(--half-size);
   --clip-path-left: var(--marginX);

@@ -6,12 +6,12 @@ function run() {
   const mainElement = document.getElementsByClassName("L3eUgb")[0];
 
   mainElement.appendChild(newDiv);
-  const imageNormalElement = document.getElementsByClassName(
-    "random-background-image-normal"
-  )[0];
-  imageNormalElement.addEventListener("animationend", (e) =>
-    startScaleAnimation(e)
-  );
+  // const imageNormalElement = document.getElementsByClassName(
+  //   "random-background-image-normal"
+  // )[0];
+  // imageNormalElement.addEventListener("animationend", (e) =>
+  //   startScaleAnimation(e)
+  // );
   function startScaleAnimation(e) {
     /*this would start the aniation of scale but it is bugged
     let time = "2000ms";
