@@ -15,7 +15,13 @@
         "https://www.google.at/"
       ],
       "js": ["script.js"],
-      "css": ["style.css"]
+      "css": ["style.css"],
+      "run_at": "document_end"
     }
-  ]
+  ],
+  "action": {
+    "default_title": "Blur Effect Popup",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab", "tabs", "contextMenus", "storage"]
 }

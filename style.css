@@ -43,7 +43,8 @@ body {
 
 .random-background-image-normal {
   clip-path: circle(100% at var(--clip-path-left) var(--clip-path-top));
-  animation: move-animation var(--move-time);
+  /* animation: move-animation; */
+  animation-duration: var(--move-time);
   animation-iteration-count: var(--animation-iteration-count);
   animation-timing-function: var(--animation-timing-function);
 }
@@ -59,7 +60,8 @@ body {
   border-color: rgb(0, 0, 0, 0.9);
   border-width: var(--border-width);
   border-radius: 50%;
-  animation: move-border-animation var(--move-time);
+  /* animation: move-border-animation; */
+  animation-duration: var(--move-time);
   animation-iteration-count: var(--animation-iteration-count);
   animation-timing-function: var(--animation-timing-function);
 }
