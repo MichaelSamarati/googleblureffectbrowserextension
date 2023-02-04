@@ -25,45 +25,39 @@ const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const localStorageBlurModeName = "blurmode";
 
-function readCurrentBlurModeFromLocalStorage() {
-  try {
-    const currentBlurMode = window.localStorage.getItem(
-      localStorageBlurModeName
-    );
-    return currentBlurMode;
-  } catch (e) {
-    console.log("readCurrentBlurModeFromLocalStorage error");
-    return defaultBlurMode;
-  }
+async function readCurrentBlurModeFromStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(
+        "localStorageBlurModeName",
+        function (result) {
+          resolve(result.localStorageBlurModeName);
+        }
+      );
+    } catch (ex) {
+      reject(ex);
+    }
+  });
 }
-
-function writeCurrentBlurModeToLocalStorage(currentBlurMode) {
-  window.localStorage.setItem(localStorageBlurModeName, currentBlurMode);
+function writeCurrentBlurModeToStorage(currentBlurMode) {
+  chrome.storage.sync
+    .set({ localStorageBlurModeName: currentBlurMode })
+    .then(() => {
+      console.log("Value is set to " + currentBlurMode);
+    });
 }
 
 run();
 
-function run() {
+async function run() {
   //Add to each blur mode button a onclick listener
   addClickListenersToBlurModeButtons(blurModeButtons);
 
   //Read current selected mode from localstorage
-  const currentBlurMode = readCurrentBlurModeFromLocalStorage();
-
+  const currentBlurMode = await readCurrentBlurModeFromStorage();
+  
   //Set the style of the current selected blur mode button
   setBlurMode(currentBlurMode);
-
-  chrome.tabs.query(
-    {
-      active: true,
-      currentWindow: true,
-    },
-    function (tabs) {
-      var activeTab = tabs[0];
-      let msg = { phrase: currentBlurMode };
-      chrome.tabs.sendMessage(activeTab.id, msg);
-    }
-  );
 }
 
 function addClickListenersToBlurModeButtons(blurModeButtons) {
@@ -86,7 +80,20 @@ function setBlurMode(blurMode) {
       document
         .getElementById(e.buttonId)
         .classList.add(selectedBlurModeButtonClass);
-      writeCurrentBlurModeToLocalStorage(blurMode);
+      writeCurrentBlurModeToStorage(blurMode);
+      try {
+        chrome.tabs.query(
+          {
+            active: true,
+            currentWindow: true,
+          },
+          function (tabs) {
+            var activeTab = tabs[0];
+            let msg = { phrase: blurMode };
+            chrome.tabs.sendMessage(activeTab.id, msg);
+          }
+        );
+      } catch (e) {}
     }
   });
 }

@@ -25,20 +25,24 @@ const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const localStorageBlurModeName = "blurmode";
 
-function readCurrentBlurModeFromLocalStorage() {
-  try {
-    const currentBlurMode = window.localStorage.getItem(
-      localStorageBlurModeName
-    );
-    return currentBlurMode;
-  } catch (e) {
-    console.log("readCurrentBlurModeFromLocalStorage error");
-    return defaultBlurMode;
-  }
+async function readCurrentBlurModeFromStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get("localStorageBlurModeName", function (result) {
+        resolve(result.localStorageBlurModeName);
+      });
+    } catch (ex) {
+      reject(ex);
+    }
+  });
 }
 
-function writeCurrentBlurModeToLocalStorage(currentBlurMode) {
-  window.localStorage.setItem(localStorageBlurModeName, currentBlurMode);
+function writeCurrentBlurModeToStorage(currentBlurMode) {
+  chrome.storage.sync
+    .set({ localStorageBlurModeName: currentBlurMode })
+    .then(() => {
+      console.log("Value is set to " + currentBlurMode);
+    });
 }
 
 run();
@@ -46,8 +50,6 @@ run();
 //TODO: scale animation
 //TODO: implement modes; rect; random; mouse over
 //TODO: fix default nonblur elemnt size
-
-var blurMode = "rect";
 
 function run() {
   //get the google background element
@@ -59,10 +61,10 @@ function run() {
   );
   //put the nonBlurCircleBorderElement on the DOM
   mainElement.appendChild(nonBlurCircleBorderElement);
-
+  //wait for non-blurred circle and afterwards start moving animation, so that the animations are in sync
   waitForElement(".random-background-image-normal").then(
     (nonBlurCircleElement) => {
-      const currentBlurMode = readCurrentBlurModeFromLocalStorage();
+      const currentBlurMode = readCurrentBlurModeFromStorage();
       if (currentBlurMode === rectBlurMode) {
         nonBlurCircleElement.style.animationName = "move-animation";
         nonBlurCircleBorderElement.style.animationName =
@@ -98,7 +100,9 @@ function waitForElement(selector) {
 
 chrome.runtime.onMessage.addListener(gotMessage);
 
-function gotMessage(message, sender, sendResponse) {}
+function gotMessage(message, sender, sendResponse) {
+  console.log(message);
+}
 
 // const nonBlurCircleBorderElement = document.getElementsByClassName(
 //   "random-background-image-normal-border"

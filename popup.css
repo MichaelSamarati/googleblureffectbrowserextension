@@ -19,6 +19,8 @@ body {
   width: 100%;
   padding: 3px;
   font-family: 'Poppins', sans-serif;
+  border-radius: 3px;
+  border-width: 0 0 0 0;
 }
 
 .selected-blur-mode-button {
@@ -26,6 +28,8 @@ body {
   padding: 3px;
   background-color: blueviolet;
   font-family: 'Poppins', sans-serif;
+  border-radius: 3px;
+  border-width: 0 0 0 0;
 }
 
 .no-select {
