@@ -1,20 +1,94 @@
+const rectBlurMode = "rect";
+const randomBlurMode = "random";
+const mouseBlurMode = "mouse";
+const disabledBlurMode = "disabled";
+const defaultBlurMode = randomBlurMode;
+const blurModeButtons = [
+  {
+    blurMode: rectBlurMode,
+    buttonId: "rect-blur-mode-button",
+  },
+  {
+    blurMode: randomBlurMode,
+    buttonId: "random-blur-mode-button",
+  },
+  {
+    blurMode: mouseBlurMode,
+    buttonId: "mouse-blur-mode-button",
+  },
+  {
+    blurMode: disabledBlurMode,
+    buttonId: "disabled-blur-mode-button",
+  },
+];
+const blurModeButtonClass = "blur-mode-button";
+const selectedBlurModeButtonClass = "selected-blur-mode-button";
+const localStorageBlurModeName = "blurmode";
+
+function readCurrentBlurModeFromLocalStorage() {
+  try {
+    const currentBlurMode = window.localStorage.getItem(
+      localStorageBlurModeName
+    );
+    return currentBlurMode;
+  } catch (e) {
+    console.log("readCurrentBlurModeFromLocalStorage error");
+    return defaultBlurMode;
+  }
+}
+
+function writeCurrentBlurModeToLocalStorage(currentBlurMode) {
+  window.localStorage.setItem(localStorageBlurModeName, currentBlurMode);
+}
+
 run();
 //TODO: make moving animation better by random location in a given rect without inner given rect;
 //TODO: scale animation
 //TODO: implement modes; rect; random; mouse over
 //TODO: fix default nonblur elemnt size
 
+var blurMode = "rect";
+
+function run() {
+  //get the google background element
+  const mainElement = document.getElementsByClassName("L3eUgb")[0];
+  //create an element that is the border of the non-blurred circle
+  const nonBlurCircleBorderElement = document.createElement("div");
+  nonBlurCircleBorderElement.classList.add(
+    "random-background-image-normal-border"
+  );
+  //put the nonBlurCircleBorderElement on the DOM
+  mainElement.appendChild(nonBlurCircleBorderElement);
+
+  waitForElement(".random-background-image-normal").then(
+    (nonBlurCircleElement) => {
+      const currentBlurMode = readCurrentBlurModeFromLocalStorage();
+      if (currentBlurMode === rectBlurMode) {
+        nonBlurCircleElement.style.animationName = "move-animation";
+        nonBlurCircleBorderElement.style.animationName =
+          "move-border-animation";
+      } else if (currentBlurMode === randomBlurMode) {
+      } else if (currentBlurMode === mouseBlurMode) {
+      } else if (currentBlurMode === disabledBlurMode) {
+      } else {
+      }
+    }
+  );
+}
+
 function waitForElement(selector) {
   return new Promise((resolve) => {
     if (document.querySelector(selector)) {
       return resolve(document.querySelector(selector));
     }
+
     const observer = new MutationObserver((mutations) => {
       if (document.querySelector(selector)) {
         resolve(document.querySelector(selector));
         observer.disconnect();
       }
     });
+
     observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -22,22 +96,9 @@ function waitForElement(selector) {
   });
 }
 
-function run() {
-  const nonBlurCircleBorderElement = document.createElement("div");
-  nonBlurCircleBorderElement.classList.add(
-    "random-background-image-normal-border"
-  );
-  const mainElement = document.getElementsByClassName("L3eUgb")[0];
+chrome.runtime.onMessage.addListener(gotMessage);
 
-  mainElement.appendChild(nonBlurCircleBorderElement);
-
-  waitForElement(".random-background-image-normal").then(
-    (nonBlurCircleElement) => {
-      nonBlurCircleElement.style.animationName = "move-animation";
-      nonBlurCircleBorderElement.style.animationName = "move-border-animation";
-    }
-  );
-}
+function gotMessage(message, sender, sendResponse) {}
 
 // const nonBlurCircleBorderElement = document.getElementsByClassName(
 //   "random-background-image-normal-border"
