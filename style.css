@@ -4,7 +4,7 @@
   --half-size: calc(var(--size)/2);
   --move-time: 5000ms;
   --blur: 5px;
-  --border-width: 6px;
+  /* --border-width: 6px; */
   /* --animation-timing-function: ease;
   --animation-iteration-count: infinite;
 

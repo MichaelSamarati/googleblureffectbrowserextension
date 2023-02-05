@@ -8,12 +8,17 @@ const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const localStorageBlurModeName = "blurmode";
 const circleSize = 300;
 const circleRadius = circleSize / 2;
+const borderWidth = 6;
 
 run();
 //TODO: make moving animation better by random location in a given rect without inner given rect;
 //TODO: scale animation
-
-var modeHasChanged;
+//TODO: Blur pixel
+//TODO: size
+//TODO: save picture at randm piucture extension
+//TODO: set at start border to leemnt or both at point so insured the same;
+var modeHasChanged = false;
+var currentBlurMode;
 
 function run() {
   //get the google background element
@@ -36,18 +41,35 @@ function run() {
   //wait for non-blurred circle and afterwards start moving animation, so that the animations are in sync
   waitForElement(".random-background-image-normal").then(
     async (nonBlurCircleElement) => {
+      //setting circle size of non blurred circle and border of it
       nonBlurCircleElement.style.setProperty("--radius", `${circleRadius}px`);
       nonBlurCircleBorderElement.style.setProperty("--size", `${circleSize}px`);
+      nonBlurCircleBorderElement.style.setProperty(
+        "--border-width",
+        `${borderWidth}px`
+      );
+      //positioning elements in center just in case animations don't work
+      nonBlurCircleBorderElement.style.top = `calc(50% - ${
+        circleRadius + borderWidth
+      }px)`;
+      nonBlurCircleBorderElement.style.left = `calc(50% - ${
+        circleRadius + borderWidth
+      }px)`;
 
-      const currentBlurMode = await readCurrentBlurModeFromStorage();
-      executeMode(currentBlurMode);
+      const blurModeFromStorage = await readCurrentBlurModeFromStorage();
+      executeMode(blurModeFromStorage);
     }
   );
 }
 
 async function executeMode(blurMode) {
-  //mode is now updating, so variable can be set to false
-  modeHasChanged = false;
+  if (blurMode !== currentBlurMode) {
+    modeHasChanged = true;
+    currentBlurMode = blurMode;
+  } else {
+    modeHasChanged = false;
+    return;
+  }
 
   //get necessary elements
   const nonBlurCircleElement = document.getElementsByClassName(
@@ -60,15 +82,20 @@ async function executeMode(blurMode) {
     "mouse-listener-area"
   )[0];
 
-  // //clean up stuff from old modes
-  // //mouse mode clean up
-  // document.body.style.cursor = "auto";
-  // mouseListenerArea.removeEventListener("mousemove", function (e) {
-  //   mouseBlurModeEventListener(e, nonBlurCircleElement);
-  // });
-  // //disabled mode clean up
-  // nonBlurCircleElement.style.clipPath = "";
-  // nonBlurCircleBorderElement.style.display = "auto";
+  //set border of circle back to top left so animations work
+  nonBlurCircleBorderElement.style.top = "0";
+  nonBlurCircleBorderElement.style.left = "0";
+
+  //clean up stuff from old modes
+  //mouse mode clean up
+  document.body.style.cursor = "auto";
+  mouseListenerArea.removeEventListener(
+    "mousemove",
+    mouseBlurModeEventListener
+  );
+  //disabled mode clean up
+  nonBlurCircleElement.style.clipPath = "";
+  nonBlurCircleBorderElement.style.display = "block";
 
   //move circle depending on mode
   if (blurMode === rectBlurMode) {
@@ -96,13 +123,14 @@ async function executeMode(blurMode) {
     );
   } else if (blurMode === mouseBlurMode) {
     document.body.style.cursor = "none";
-    mouseListenerArea.addEventListener("mousemove", function (e) {
-      mouseBlurModeEventListener(
-        e,
+    mouseListenerArea.addEventListener("mousemove", mouseBlurModeEventListener);
+    function mouseBlurModeEventListener({ offsetX, offsetY }) {
+      updateElementPositions(
+        { x: offsetX, y: offsetY },
         nonBlurCircleElement,
         nonBlurCircleBorderElement
       );
-    });
+    }
   } else if (blurMode === disabledBlurMode) {
     //hide blurred image and border of it
     nonBlurCircleElement.style.clipPath = "circle(100% at center)";
@@ -141,7 +169,13 @@ function animateMovement(
       Math.pow(destinationPosition.y - sourcePosition.y, 2)
   );
   let duration = (distance / distanceForOneSecond) * 1000;
+  modeHasChanged = false;
+  requestAnimationFrame(animate);
   function animate(timestamp) {
+    if (modeHasChanged) {
+      modeHasChanged = false;
+      return;
+    }
     if (!start) start = timestamp;
     let diff = timestamp - start;
     let progress = diff / duration;
@@ -180,15 +214,8 @@ function animateMovement(
       );
       duration = (distance / distanceForOneSecond) * 1000;
     }
-    if (modeHasChanged) {
-      //disabled mode clean up
-      nonBlurCircleElement.style.clipPath = "";
-      nonBlurCircleBorderElement.style.display = "auto";
-      return;
-    }
     requestAnimationFrame(animate);
   }
-  requestAnimationFrame(animate);
 }
 
 function updateElementPositions(
@@ -210,25 +237,6 @@ function calculateNewPosition(progress, sourcePosition, destinationPosition) {
     easeInOutQuad(progress) * (destinationPosition.y - sourcePosition.y) +
     sourcePosition.y;
   return { x: newX, y: newY };
-}
-
-function mouseBlurModeEventListener(
-  { offsetX, offsetY },
-  nonBlurCircleElement,
-  nonBlurCircleBorderElement
-) {
-  if (modeHasChanged) {
-    //mouse mode clean up
-    document.body.style.cursor = "auto";
-    mouseListenerArea.removeEventListener("mousemove", function (e) {
-      mouseBlurModeEventListener(e, nonBlurCircleElement);
-    });
-  }
-  updateElementPositions(
-    { x: offsetX, y: offsetY },
-    nonBlurCircleElement,
-    nonBlurCircleBorderElement
-  );
 }
 
 function getNextRectPosition(oldPosition, xMin, xMax, yMin, yMax) {
@@ -307,7 +315,5 @@ function writeCurrentBlurModeToStorage(currentBlurMode) {
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
-  console.log(message);
-  modeHasChanged = true;
-  executeMode(message);
+  executeMode(message.blurMode);
 }
