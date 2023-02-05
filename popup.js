@@ -89,7 +89,7 @@ function setBlurMode(blurMode) {
           },
           function (tabs) {
             var activeTab = tabs[0];
-            let msg = { phrase: blurMode };
+            let msg = { blurMode: blurMode };
             chrome.tabs.sendMessage(activeTab.id, msg);
           }
         );

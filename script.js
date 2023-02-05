@@ -3,53 +3,17 @@ const randomBlurMode = "random";
 const mouseBlurMode = "mouse";
 const disabledBlurMode = "disabled";
 const defaultBlurMode = randomBlurMode;
-const blurModeButtons = [
-  {
-    blurMode: rectBlurMode,
-    buttonId: "rect-blur-mode-button",
-  },
-  {
-    blurMode: randomBlurMode,
-    buttonId: "random-blur-mode-button",
-  },
-  {
-    blurMode: mouseBlurMode,
-    buttonId: "mouse-blur-mode-button",
-  },
-  {
-    blurMode: disabledBlurMode,
-    buttonId: "disabled-blur-mode-button",
-  },
-];
 const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const localStorageBlurModeName = "blurmode";
-
-async function readCurrentBlurModeFromStorage() {
-  return new Promise((resolve, reject) => {
-    try {
-      chrome.storage.sync.get("localStorageBlurModeName", function (result) {
-        resolve(result.localStorageBlurModeName);
-      });
-    } catch (ex) {
-      reject(ex);
-    }
-  });
-}
-
-function writeCurrentBlurModeToStorage(currentBlurMode) {
-  chrome.storage.sync
-    .set({ localStorageBlurModeName: currentBlurMode })
-    .then(() => {
-      console.log("Value is set to " + currentBlurMode);
-    });
-}
+const circleSize = 300;
+const circleRadius = circleSize / 2;
 
 run();
 //TODO: make moving animation better by random location in a given rect without inner given rect;
 //TODO: scale animation
-//TODO: implement modes; rect; random; mouse over
-//TODO: fix default nonblur elemnt size
+
+var modeHasChanged;
 
 function run() {
   //get the google background element
@@ -59,23 +23,245 @@ function run() {
   nonBlurCircleBorderElement.classList.add(
     "random-background-image-normal-border"
   );
+  nonBlurCircleBorderElement.classList.add("no-select");
+
+  //create absolute element for mouse listener in case of mouse mode
+  const mouseListenerArea = document.createElement("div");
+  mouseListenerArea.classList.add("mouse-listener-area");
+
   //put the nonBlurCircleBorderElement on the DOM
   mainElement.appendChild(nonBlurCircleBorderElement);
+  mainElement.appendChild(mouseListenerArea);
+
   //wait for non-blurred circle and afterwards start moving animation, so that the animations are in sync
   waitForElement(".random-background-image-normal").then(
-    (nonBlurCircleElement) => {
-      const currentBlurMode = readCurrentBlurModeFromStorage();
-      if (currentBlurMode === rectBlurMode) {
-        nonBlurCircleElement.style.animationName = "move-animation";
-        nonBlurCircleBorderElement.style.animationName =
-          "move-border-animation";
-      } else if (currentBlurMode === randomBlurMode) {
-      } else if (currentBlurMode === mouseBlurMode) {
-      } else if (currentBlurMode === disabledBlurMode) {
-      } else {
-      }
+    async (nonBlurCircleElement) => {
+      nonBlurCircleElement.style.setProperty("--radius", `${circleRadius}px`);
+      nonBlurCircleBorderElement.style.setProperty("--size", `${circleSize}px`);
+
+      const currentBlurMode = await readCurrentBlurModeFromStorage();
+      executeMode(currentBlurMode);
     }
   );
+}
+
+async function executeMode(blurMode) {
+  //mode is now updating, so variable can be set to false
+  modeHasChanged = false;
+
+  //get necessary elements
+  const nonBlurCircleElement = document.getElementsByClassName(
+    "random-background-image-normal"
+  )[0];
+  const nonBlurCircleBorderElement = document.getElementsByClassName(
+    "random-background-image-normal-border"
+  )[0];
+  const mouseListenerArea = document.getElementsByClassName(
+    "mouse-listener-area"
+  )[0];
+
+  // //clean up stuff from old modes
+  // //mouse mode clean up
+  // document.body.style.cursor = "auto";
+  // mouseListenerArea.removeEventListener("mousemove", function (e) {
+  //   mouseBlurModeEventListener(e, nonBlurCircleElement);
+  // });
+  // //disabled mode clean up
+  // nonBlurCircleElement.style.clipPath = "";
+  // nonBlurCircleBorderElement.style.display = "auto";
+
+  //move circle depending on mode
+  if (blurMode === rectBlurMode) {
+    const getNewPosition = (oldPosition, xMin, xMax, yMin, yMax) => {
+      return getNextRectPosition(oldPosition, xMin, xMax, yMin, yMax);
+    };
+    animateMovement(
+      nonBlurCircleElement,
+      nonBlurCircleBorderElement,
+      getNewPosition
+    );
+  } else if (blurMode === randomBlurMode) {
+    const getNewPosition = (oldPosition, xMin, nxMax, yMin, yMax) => {
+      return getRandomPosition(
+        0,
+        nonBlurCircleElement.getBoundingClientRect().right,
+        0,
+        nonBlurCircleElement.getBoundingClientRect().bottom
+      );
+    };
+    animateMovement(
+      nonBlurCircleElement,
+      nonBlurCircleBorderElement,
+      getNewPosition
+    );
+  } else if (blurMode === mouseBlurMode) {
+    document.body.style.cursor = "none";
+    mouseListenerArea.addEventListener("mousemove", function (e) {
+      mouseBlurModeEventListener(
+        e,
+        nonBlurCircleElement,
+        nonBlurCircleBorderElement
+      );
+    });
+  } else if (blurMode === disabledBlurMode) {
+    //hide blurred image and border of it
+    nonBlurCircleElement.style.clipPath = "circle(100% at center)";
+    nonBlurCircleBorderElement.style.display = "none";
+  }
+}
+
+function animateMovement(
+  nonBlurCircleElement,
+  nonBlurCircleBorderElement,
+  getNewPosition
+) {
+  const distanceForOneSecond = 600;
+  let nonBlurCircleElementRect = nonBlurCircleElement.getBoundingClientRect();
+  let nonBlurCircleElementWidth = nonBlurCircleElementRect.right;
+  let nonBlurCircleElementHeight = nonBlurCircleElementRect.bottom;
+
+  let marginX = 0.17 * nonBlurCircleElementWidth;
+  let marginY = 0.21 * nonBlurCircleElementHeight;
+  let xMin = marginX;
+  let xMax = nonBlurCircleElementWidth - marginX;
+  let yMin = marginY;
+  let yMax = nonBlurCircleElementHeight - marginY;
+
+  let sourcePosition = getNewPosition(null, xMin, xMax, yMin, yMax);
+  let destinationPosition = getNewPosition(
+    sourcePosition,
+    xMin,
+    xMax,
+    yMin,
+    yMax
+  );
+  let start = null;
+  let distance = Math.sqrt(
+    Math.pow(destinationPosition.x - sourcePosition.x, 2) +
+      Math.pow(destinationPosition.y - sourcePosition.y, 2)
+  );
+  let duration = (distance / distanceForOneSecond) * 1000;
+  function animate(timestamp) {
+    if (!start) start = timestamp;
+    let diff = timestamp - start;
+    let progress = diff / duration;
+    let currentPosition = calculateNewPosition(
+      progress,
+      sourcePosition,
+      destinationPosition
+    );
+    nonBlurCircleElementRect = nonBlurCircleElement.getBoundingClientRect();
+    nonBlurCircleElementWidth = nonBlurCircleElementRect.right;
+    nonBlurCircleElementHeight = nonBlurCircleElementRect.bottom;
+    marginX = 0.17 * nonBlurCircleElementWidth;
+    marginY = 0.21 * nonBlurCircleElementHeight;
+    xMin = marginX;
+    xMax = nonBlurCircleElementWidth - marginX;
+    yMin = marginY;
+    yMax = nonBlurCircleElementHeight - marginY;
+    updateElementPositions(
+      currentPosition,
+      nonBlurCircleElement,
+      nonBlurCircleBorderElement
+    );
+    if (diff >= duration) {
+      start = null;
+      sourcePosition = destinationPosition;
+      destinationPosition = getNewPosition(
+        sourcePosition,
+        xMin,
+        xMax,
+        yMin,
+        yMax
+      );
+      distance = Math.sqrt(
+        Math.pow(destinationPosition.x - sourcePosition.x, 2) +
+          Math.pow(destinationPosition.y - sourcePosition.y, 2)
+      );
+      duration = (distance / distanceForOneSecond) * 1000;
+    }
+    if (modeHasChanged) {
+      //disabled mode clean up
+      nonBlurCircleElement.style.clipPath = "";
+      nonBlurCircleBorderElement.style.display = "auto";
+      return;
+    }
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+}
+
+function updateElementPositions(
+  currentPosition,
+  nonBlurCircleElement,
+  nonBlurCircleBorderElement
+) {
+  nonBlurCircleElement.style.setProperty("--x", `${currentPosition.x}px`);
+  nonBlurCircleElement.style.setProperty("--y", `${currentPosition.y}px`);
+  nonBlurCircleBorderElement.style.setProperty("--x", `${currentPosition.x}px`);
+  nonBlurCircleBorderElement.style.setProperty("--y", `${currentPosition.y}px`);
+}
+
+function calculateNewPosition(progress, sourcePosition, destinationPosition) {
+  let newX =
+    easeInOutQuad(progress) * (destinationPosition.x - sourcePosition.x) +
+    sourcePosition.x;
+  let newY =
+    easeInOutQuad(progress) * (destinationPosition.y - sourcePosition.y) +
+    sourcePosition.y;
+  return { x: newX, y: newY };
+}
+
+function mouseBlurModeEventListener(
+  { offsetX, offsetY },
+  nonBlurCircleElement,
+  nonBlurCircleBorderElement
+) {
+  if (modeHasChanged) {
+    //mouse mode clean up
+    document.body.style.cursor = "auto";
+    mouseListenerArea.removeEventListener("mousemove", function (e) {
+      mouseBlurModeEventListener(e, nonBlurCircleElement);
+    });
+  }
+  updateElementPositions(
+    { x: offsetX, y: offsetY },
+    nonBlurCircleElement,
+    nonBlurCircleBorderElement
+  );
+}
+
+function getNextRectPosition(oldPosition, xMin, xMax, yMin, yMax) {
+  if (!oldPosition) {
+    return { x: xMin, y: yMin };
+  }
+  if (oldPosition.x === xMin && oldPosition.y === yMin) {
+    return { x: xMax, y: yMin };
+  }
+  if (oldPosition.x === xMax && oldPosition.y === yMin) {
+    return { x: xMax, y: yMax };
+  }
+  if (oldPosition.x === xMax && oldPosition.y === yMax) {
+    return { x: xMin, y: yMax };
+  }
+  if (oldPosition.x === xMin && oldPosition.y === yMax) {
+    return { x: xMin, y: yMin };
+  }
+  return { x: xMin, y: yMin };
+}
+
+function getRandomPosition(xMin, xMax, yMin, yMax) {
+  let x = getRandomValue(xMin, xMax);
+  let y = getRandomValue(yMin, yMax);
+  return { x, y };
+}
+
+function getRandomValue(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function easeInOutQuad(x) {
+  return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
 }
 
 function waitForElement(selector) {
@@ -98,73 +284,30 @@ function waitForElement(selector) {
   });
 }
 
+async function readCurrentBlurModeFromStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get("localStorageBlurModeName", function (result) {
+        resolve(result.localStorageBlurModeName);
+      });
+    } catch (ex) {
+      reject(ex);
+    }
+  });
+}
+
+function writeCurrentBlurModeToStorage(currentBlurMode) {
+  chrome.storage.sync
+    .set({ localStorageBlurModeName: currentBlurMode })
+    .then(() => {
+      console.log("Value is set to " + currentBlurMode);
+    });
+}
+
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
   console.log(message);
-}
-
-// const nonBlurCircleBorderElement = document.getElementsByClassName(
-//   "random-background-image-normal-border"
-// )[0];
-// console.log(nonBlurCircleBorderElement);
-// const nonBlurCircleElement = document.getElementsByClassName(
-//   "random-background-image-normal"
-// )[0];
-// console.log(nonBlurCircleElement);
-// setTimeout(console.log("adasda"), 50);
-// const nonBlurCircleElement = document.getElementsByClassName(
-//   "random-background-image-normal"
-// )[0];
-// console.log(nonBlurCircleElement);
-// nonBlurCircleElement.style.animation = "move-animation";
-// newDiv.style.animation = "move-border-animation";
-
-// const imageNormalElement = document.getElementsByClassName(
-//   "random-background-image-normal"
-// )[0];
-// imageNormalElement.addEventListener("animationend", (e) =>
-//   startScaleAnimation(e)
-// );
-//function startScaleAnimation(e) {
-/*this would start the aniation of scale but it is bugged
-    let time = "2000ms";
-    newDiv.classList.add("no-click");
-
-    newDiv.style.animation = "scale-border-animation";
-    newDiv.style.animationDuration = time;
-    */
-// imageNormalElement.style.animation = "scale-animation";
-// imageNormalElement.style.animationDuration = time;
-// imageNormalElement.classList.add(".clip-path-animation");
-// imageNormalElement.style.animation = "scale-animation";
-// imageNormalElement.style.animationDuration = time;
-// let start = null;
-// let end = 2000;
-// let current = 10;
-// function animate(timestamp) {
-//   if (!start) start = timestamp;
-//   let progress = timestamp - start;
-//   // Update the radius
-//   current = (end - 2000) * (progress / 2000) + 300;
-//   imageNormalElement.style.clipPath = `circle(${current}px at center)`;
-//   console.log(progress);
-//   // Repeat the animation if it's not complete
-//   if (progress < 2000) {
-//     requestAnimationFrame(animate);
-//   }
-// }
-// requestAnimationFrame(animate);
-//}
-// setInterval(() => {
-//   const imageNormalElement = document.getElementsByClassName("L3eUgb")[0];
-//   var rect = imageNormalElement.getBoundingClientRect();
-//   console.log(rect.top, rect.right, rect.bottom, rect.left);
-//   newDiv.style.left = rect.left + "px";
-//   newDiv.style.top = rect.top + "px";
-// }, 500);
-//}
-
-function remove(element) {
-  element.parentNode.removeChild(element);
+  modeHasChanged = true;
+  executeMode(message);
 }

@@ -1,12 +1,11 @@
 :root {
   --marginX: 17vw;
   --marginY: 21vh;
-  --size: 300px;
   --half-size: calc(var(--size)/2);
   --move-time: 5000ms;
   --blur: 5px;
   --border-width: 6px;
-  --animation-timing-function: ease;
+  /* --animation-timing-function: ease;
   --animation-iteration-count: infinite;
 
   --clip-path-circle-radius: var(--half-size);
@@ -18,7 +17,7 @@
   --border-left-translate: calc(var(--marginX) - var(--half-size) - var(--border-width));
   --border-right-translate: calc(100vw - var(--marginX) - var(--half-size) - var(--border-width));
   --border-top-translate: calc(var(--marginY) - var(--half-size) - var(--border-width));
-  --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width));
+  --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width)); */
 }
 
 body {
@@ -42,31 +41,33 @@ body {
 }
 
 .random-background-image-normal {
-  clip-path: circle(100% at var(--clip-path-left) var(--clip-path-top));
-  /* animation: move-animation; */
-  animation-duration: var(--move-time);
-  animation-iteration-count: var(--animation-iteration-count);
-  animation-timing-function: var(--animation-timing-function);
+  clip-path: circle(var(--radius) at var(--x, 50%) var(--y, 50%));
 }
 
 .random-background-image-normal-border {
-  width: 6000px;
-  height: 6000px;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  left: 50%;
+  width: var(--size);
+  height: var(--size);
+  transform: translate(calc(var(--x) - 50%), calc(var(--y) - 50%));
+  top: 0;
+  left: 0;
   position: absolute;
   border-style: groove;
   border-color: rgb(0, 0, 0, 0.9);
   border-width: var(--border-width);
   border-radius: 50%;
-  /* animation: move-border-animation; */
-  animation-duration: var(--move-time);
-  animation-iteration-count: var(--animation-iteration-count);
-  animation-timing-function: var(--animation-timing-function);
+  z-index: -1;
 }
 
-@keyframes move-animation {
+.mouse-listener-area {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 90;
+}
+
+/* @keyframes move-animation {
   0% {
     clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
   }
@@ -116,32 +117,4 @@ body {
     left: 0;
     transform: translate(var(--border-left-translate), var(--border-top-translate));
   }
-}
-
-@keyframes scale-animation {
-  0% {
-    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
-  }
-
-  100% {
-    clip-path: circle(var(--clip-path-circle-radius)*7 at center);
-  }
-}
-
-@keyframes scale-border-animation {
-  0% {
-    width: var(--size);
-    height: var(--size);
-    top: 0;
-    left: 0;
-    transform: translate(var(--border-left-translate), var(--border-top-translate));
-  }
-
-  100% {
-    width: 6000px;
-    height: 6000px;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    left: 50%;
-  }
-}
+} */

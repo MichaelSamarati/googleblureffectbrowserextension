@@ -26,7 +26,7 @@ body {
 .selected-blur-mode-button {
   width: 100%;
   padding: 3px;
-  background-color: blueviolet;
+  background-color: rgb(32, 140, 255);
   font-family: 'Poppins', sans-serif;
   border-radius: 3px;
   border-width: 0 0 0 0;
