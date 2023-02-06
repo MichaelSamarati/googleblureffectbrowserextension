@@ -5,25 +5,26 @@ const disabledBlurMode = "disabled";
 const defaultBlurMode = randomBlurMode;
 const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
-const storageBlurModeName = "blurmode";
-const storageCircleSizeName = "circlesize";
-const defaultCircleSize = 50;
+const storageblurmodename = "blurmode";
+const storagecirclesizename = "circlesize";
+const defaultCircleSize = 15;
 const defaultBorderWidth = 6;
 
-run();
 //TODO: make moving animation better by random location in a given rect without inner given rect;
-//TODO: scale animation
 //TODO: Blur pixel
-//TODO: size
 //TODO: save picture at randm piucture extension
 //TODO: set at start border to leemnt or both at point so insured the same;
 //TODO: button hover color
 //TODO: update slider on default value button cliock
+//TODO: fix vlur mode at startt nothign is selected and make both same positon
+
 var modeHasChanged = false;
 var currentBlurMode;
 var lastAnimationId;
 var circleSize = defaultCircleSize;
 var borderWidth = defaultBorderWidth;
+
+run();
 
 function run() {
   //get the google background element
@@ -329,11 +330,11 @@ function waitForElement(selector) {
   });
 }
 
-async function readFromStorage(name) {
+async function readCurrentBlurModeFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get("name", function (result) {
-        resolve(result.name);
+      chrome.storage.sync.get(["storageblurmodename"], function (result) {
+        resolve(result.storageblurmodename);
       });
     } catch (e) {
       reject(e);
@@ -341,24 +342,24 @@ async function readFromStorage(name) {
   });
 }
 
-function writeToStorage(name, value) {
-  chrome.storage.sync.set({ name: value });
-}
-
-async function readCurrentBlurModeFromStorage() {
-  return await readFromStorage(storageBlurModeName);
-}
-
 async function readCircleSizeFromStorage() {
-  return await readFromStorage(storageCircleSizeName);
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(["storagecirclesizename"], function (result) {
+        resolve(result.storagecirclesizename);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
-function writeCurrentBlurModeToStorage(currentBlurMode) {
-  writeToStorage(storageBlurModeName, currentBlurMode);
+async function writeCurrentBlurModeToStorage(currentBlurMode) {
+  await chrome.storage.sync.set({ storageblurmodename: currentBlurMode });
 }
 
-function writeCircleSizeToStorage(circleSize) {
-  writeToStorage(storageCircleSizeName, circleSize);
+async function writeCircleSizeToStorage(circleSize) {
+  await chrome.storage.sync.set({ storagecirclesizename: circleSize });
 }
 
 chrome.runtime.onMessage.addListener(gotMessage);

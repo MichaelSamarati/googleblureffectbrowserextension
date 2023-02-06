@@ -1,10 +1,4 @@
 :root {
-  --marginX: 17vw;
-  --marginY: 21vh;
-  --half-size: calc(var(--size)/2);
-  --move-time: 5000ms;
-  --blur: 5px;
-
   --clip-path-circle-radius: var(--half-size);
   --clip-path-left: var(--marginX);
   --clip-path-right: calc(100vw - var(--marginX));
@@ -17,52 +11,6 @@
   --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width)); */
 }
 
-body {
-  overflow: hidden;
-}
-
-.no-blur {
-  filter: none;
-}
-
-.no-select {
-  user-select: none;
-}
-
-.no-click {
-  pointer-events: none;
-}
-
-.random-background-image-blur {
-  filter: blur(var(--blur));
-}
-
-.random-background-image-normal {
-  clip-path: circle(var(--radius) at var(--x, 50%) var(--y, 50%));
-}
-
-.random-background-image-normal-border {
-  width: var(--size);
-  height: var(--size);
-  transform: translate(calc(var(--x) - 50%), calc(var(--y) - 50%));
-  top: 0;
-  left: 0;
-  position: absolute;
-  border-style: groove;
-  border-color: rgb(0, 0, 0, 0.9);
-  border-width: var(--border-width);
-  border-radius: 50%;
-  z-index: -1;
-}
-
-.mouse-listener-area {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 90;
-}
 
 /* @keyframes move-animation {
   0% {
