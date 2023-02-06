@@ -23,13 +23,14 @@ const blurModeButtons = [
 ];
 const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
-const localStorageBlurModeName = "blurmode";
+const storageBlurModeName = "blurmode";
+const storageCircleSizeName = "circlesize";
 
-async function readCurrentBlurModeFromStorage() {
+async function readFromStorage(name) {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get("localStorageBlurModeName", function (result) {
-        resolve(result.localStorageBlurModeName);
+      chrome.storage.sync.get("name", function (result) {
+        resolve(result.name);
       });
     } catch (e) {
       reject(e);
@@ -37,17 +38,35 @@ async function readCurrentBlurModeFromStorage() {
   });
 }
 
+function writeToStorage(name, value) {
+  chrome.storage.sync.set({ name: value });
+}
+
+async function readCurrentBlurModeFromStorage() {
+  return await readFromStorage(storageBlurModeName);
+}
+
+async function readCircleSizeFromStorage() {
+  return await readFromStorage(storageCircleSizeName);
+}
+
 function writeCurrentBlurModeToStorage(currentBlurMode) {
-  chrome.storage.sync.set({ localStorageBlurModeName: currentBlurMode });
+  writeToStorage(storageBlurModeName, currentBlurMode);
+}
+
+function writeCircleSizeToStorage(cirlceSize) {
+  writeToStorage(storageCircleSizeName, cirlceSize);
 }
 
 run();
 
 async function run() {
+  const circleSizeSlider = document.getElementById("circle-size-slider");
+
   //Add to each blur mode button a onclick listener
   addClickListenersToBlurModeButtons(blurModeButtons);
 
-  //Read current selected mode from localstorage
+  //Read current selected mode from storage
   const currentBlurMode = await readCurrentBlurModeFromStorage();
 
   //Set the style of the current selected blur mode button
