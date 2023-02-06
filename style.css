@@ -1,20 +1,5 @@
 :root {
-  --marginX: 17vw;
-  --marginY: 21vh;
-  --half-size: calc(var(--size)/2);
-  --move-time: 5000ms;
   --blur: 5px;
-
-  --clip-path-circle-radius: var(--half-size);
-  --clip-path-left: var(--marginX);
-  --clip-path-right: calc(100vw - var(--marginX));
-  --clip-path-top: var(--marginY);
-  --clip-path-bottom: calc(100vh - var(--marginY));
-
-  --border-left-translate: calc(var(--marginX) - var(--half-size) - var(--border-width));
-  --border-right-translate: calc(100vw - var(--marginX) - var(--half-size) - var(--border-width));
-  --border-top-translate: calc(var(--marginY) - var(--half-size) - var(--border-width));
-  --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width)); */
 }
 
 body {
@@ -63,55 +48,3 @@ body {
   left: 0;
   z-index: 90;
 }
-
-/* @keyframes move-animation {
-  0% {
-    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
-  }
-
-  25% {
-    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-right) var(--clip-path-top));
-  }
-
-  50% {
-    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-right) var(--clip-path-bottom));
-  }
-
-  75% {
-    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-bottom));
-  }
-
-  100% {
-    clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
-  }
-}
-
-@keyframes move-border-animation {
-  0% {
-    width: var(--size);
-    height: var(--size);
-    top: 0;
-    left: 0;
-    transform: translate(var(--border-left-translate), var(--border-top-translate));
-  }
-
-  25% {
-    transform: translate(var(--border-right-translate), var(--border-top-translate));
-  }
-
-  50% {
-    transform: translate(var(--border-right-translate), var(--border-bottom-translate));
-  }
-
-  75% {
-    transform: translate(var(--border-left-translate), var(--border-bottom-translate));
-  }
-
-  100% {
-    width: var(--size);
-    height: var(--size);
-    top: 0;
-    left: 0;
-    transform: translate(var(--border-left-translate), var(--border-top-translate));
-  }
-} */

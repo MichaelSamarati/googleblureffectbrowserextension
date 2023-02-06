@@ -1,4 +1,10 @@
 :root {
+  --marginX: 17vw;
+  --marginY: 21vh;
+  --half-size: calc(var(--size)/2);
+  --move-time: 5000ms;
+  --blur: 5px;
+
   --clip-path-circle-radius: var(--half-size);
   --clip-path-left: var(--marginX);
   --clip-path-right: calc(100vw - var(--marginX));
@@ -8,11 +14,10 @@
   --border-left-translate: calc(var(--marginX) - var(--half-size) - var(--border-width));
   --border-right-translate: calc(100vw - var(--marginX) - var(--half-size) - var(--border-width));
   --border-top-translate: calc(var(--marginY) - var(--half-size) - var(--border-width));
-  --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width)); */
+  --border-bottom-translate: calc(100vh - var(--marginY) - var(--half-size) - var(--border-width));
 }
 
-
-/* @keyframes move-animation {
+@keyframes move-animation {
   0% {
     clip-path: circle(var(--clip-path-circle-radius) at var(--clip-path-left) var(--clip-path-top));
   }
@@ -62,4 +67,4 @@
     left: 0;
     transform: translate(var(--border-left-translate), var(--border-top-translate));
   }
-} */
+}

@@ -10,13 +10,10 @@ const storagecirclesizename = "circlesize";
 const defaultCircleSize = 15;
 const defaultBorderWidth = 6;
 
-//TODO: make moving animation better by random location in a given rect without inner given rect;
 //TODO: Blur pixel
 //TODO: save picture at randm piucture extension
 //TODO: set at start border to leemnt or both at point so insured the same;
 //TODO: button hover color
-//TODO: update slider on default value button cliock
-//TODO: fix vlur mode at startt nothign is selected and make both same positon
 
 var modeHasChanged = false;
 var currentBlurMode;
