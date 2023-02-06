@@ -17,6 +17,7 @@ run();
 //TODO: size
 //TODO: save picture at randm piucture extension
 //TODO: set at start border to leemnt or both at point so insured the same;
+//TODO: button hover color
 var modeHasChanged = false;
 var currentBlurMode;
 var lastAnimationId;

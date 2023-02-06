@@ -1,3 +1,7 @@
+:root {
+  --gap: 8px;
+}
+
 body {
   width: 100%;
   height: 100%;
@@ -6,21 +10,32 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
+.no-select {
+  user-select: none;
+}
+
 .popup {
-  width: 130px;
+  width: 220px;
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--gap);
   background-color: rgb(32, 33, 36);
 }
 
-.blur-mode-button {
-  width: 100%;
-  padding: 3px;
+.title {
+  display: flex;
+  justify-content: center;
   font-family: 'Poppins', sans-serif;
-  border-radius: 3px;
-  border-width: 0 0 0 0;
+  color: #fff;
+  font-size: large;
+}
+
+.content-wrapper {
+  display: grid;
+  grid-template-columns: calc(50% - var(--gap)/2) calc(50% - var(--gap)/2);
+  column-gap: var(--gap);
+  row-gap: var(--gap);
 }
 
 .selected-blur-mode-button {
@@ -32,6 +47,28 @@ body {
   border-width: 0 0 0 0;
 }
 
-.no-select {
-  user-select: none;
+.circle-size-button {
+  width: 100%;
+  padding: 3px;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 3px;
+  border-width: 0 0 0 0;
+}
+
+.circle-size-slider-wrapper {
+  width: 100%;
+}
+
+.circle-size-slider {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.blur-mode-button {
+  width: 100%;
+  padding: 3px;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 3px;
+  border-width: 0 0 0 0;
 }
