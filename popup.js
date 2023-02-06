@@ -25,6 +25,8 @@ const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const storageBlurModeName = "blurmode";
 const storageCircleSizeName = "circlesize";
+const defaultCircleSize = 50;
+const defaultBorderWidth = 6;
 
 async function readFromStorage(name) {
   return new Promise((resolve, reject) => {
@@ -54,14 +56,22 @@ function writeCurrentBlurModeToStorage(currentBlurMode) {
   writeToStorage(storageBlurModeName, currentBlurMode);
 }
 
-function writeCircleSizeToStorage(cirlceSize) {
-  writeToStorage(storageCircleSizeName, cirlceSize);
+function writeCircleSizeToStorage(circleSize) {
+  writeToStorage(storageCircleSizeName, circleSize);
 }
 
 run();
 
 async function run() {
   const circleSizeSlider = document.getElementById("circle-size-slider");
+  circleSizeSlider.addEventListener("change", function (e) {
+    setCircleSize(e.target.value);
+  });
+
+  const circleSizeButton = document.getElementById("circle-size-button");
+  circleSizeButton.addEventListener("click", function (e) {
+    setCircleSize(defaultCircleSize);
+  });
 
   //Add to each blur mode button a onclick listener
   addClickListenersToBlurModeButtons(blurModeButtons);
@@ -109,4 +119,21 @@ function setBlurMode(blurMode) {
       } catch (e) {}
     }
   });
+}
+
+function setCircleSize(circleSize) {
+  writeCircleSizeToStorage(circleSize);
+  try {
+    chrome.tabs.query(
+      {
+        active: true,
+        currentWindow: true,
+      },
+      function (tabs) {
+        var activeTab = tabs[0];
+        let msg = { circleSize: circleSize };
+        chrome.tabs.sendMessage(activeTab.id, msg);
+      }
+    );
+  } catch (e) {}
 }

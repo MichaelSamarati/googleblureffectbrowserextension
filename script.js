@@ -7,9 +7,8 @@ const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const storageBlurModeName = "blurmode";
 const storageCircleSizeName = "circlesize";
-const circleSize = 300;
-const circleRadius = circleSize / 2;
-const borderWidth = 6;
+const defaultCircleSize = 50;
+const defaultBorderWidth = 6;
 
 run();
 //TODO: make moving animation better by random location in a given rect without inner given rect;
@@ -19,9 +18,12 @@ run();
 //TODO: save picture at randm piucture extension
 //TODO: set at start border to leemnt or both at point so insured the same;
 //TODO: button hover color
+//TODO: update slider on default value button cliock
 var modeHasChanged = false;
 var currentBlurMode;
 var lastAnimationId;
+var circleSize = defaultCircleSize;
+var borderWidth = defaultBorderWidth;
 
 function run() {
   //get the google background element
@@ -44,24 +46,48 @@ function run() {
   //wait for non-blurred circle and afterwards start moving animation, so that the animations are in sync
   waitForElement(".random-background-image-normal").then(
     async (nonBlurCircleElement) => {
-      //setting circle size of non blurred circle and border of it
-      nonBlurCircleElement.style.setProperty("--radius", `${circleRadius}px`);
-      nonBlurCircleBorderElement.style.setProperty("--size", `${circleSize}px`);
-      nonBlurCircleBorderElement.style.setProperty(
-        "--border-width",
-        `${borderWidth}px`
-      );
+      //setting circle size of non blurred circle and border element of it
+      updateCircleSize(circleSize);
+
       //positioning elements in center just in case animations don't work
       nonBlurCircleBorderElement.style.top = `calc(50% - ${
-        circleRadius + borderWidth
+        circleSize / 2 + borderWidth
       }px)`;
       nonBlurCircleBorderElement.style.left = `calc(50% - ${
-        circleRadius + borderWidth
+        circleSize / 2 + borderWidth
       }px)`;
 
       const blurModeFromStorage = await readCurrentBlurModeFromStorage();
       executeMode(blurModeFromStorage);
     }
+  );
+}
+
+function updateCircleSize(newCircleSize) {
+  //update new circle sizes
+  circleSize = newCircleSize;
+
+  //get necessary elements
+  const nonBlurCircleElement = document.getElementsByClassName(
+    "random-background-image-normal"
+  )[0];
+  const nonBlurCircleBorderElement = document.getElementsByClassName(
+    "random-background-image-normal-border"
+  )[0];
+
+  //get new absolute size
+  const nonBlurCircleElementRect = nonBlurCircleElement.getBoundingClientRect();
+  const width = nonBlurCircleElementRect.right;
+  const height = nonBlurCircleElementRect.bottom;
+  const largerDimension = Math.max(width, height);
+  const diameter = (largerDimension * circleSize) / 100;
+
+  //update element sizes
+  nonBlurCircleElement.style.setProperty("--radius", `${diameter / 2}px`);
+  nonBlurCircleBorderElement.style.setProperty("--size", `${diameter}px`);
+  nonBlurCircleBorderElement.style.setProperty(
+    "--border-width",
+    `${borderWidth}px`
   );
 }
 
@@ -331,12 +357,17 @@ function writeCurrentBlurModeToStorage(currentBlurMode) {
   writeToStorage(storageBlurModeName, currentBlurMode);
 }
 
-function writeCircleSizeToStorage(cirlceSize) {
-  writeToStorage(storageCircleSizeName, cirlceSize);
+function writeCircleSizeToStorage(circleSize) {
+  writeToStorage(storageCircleSizeName, circleSize);
 }
 
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
-  executeMode(message.blurMode);
+  if (message.blurMode) {
+    executeMode(message.blurMode);
+  }
+  if (message.circleSize) {
+    updateCircleSize(message.circleSize);
+  }
 }
