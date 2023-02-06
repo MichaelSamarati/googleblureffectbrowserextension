@@ -28,23 +28,17 @@ const localStorageBlurModeName = "blurmode";
 async function readCurrentBlurModeFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(
-        "localStorageBlurModeName",
-        function (result) {
-          resolve(result.localStorageBlurModeName);
-        }
-      );
-    } catch (ex) {
-      reject(ex);
+      chrome.storage.sync.get("localStorageBlurModeName", function (result) {
+        resolve(result.localStorageBlurModeName);
+      });
+    } catch (e) {
+      reject(e);
     }
   });
 }
+
 function writeCurrentBlurModeToStorage(currentBlurMode) {
-  chrome.storage.sync
-    .set({ localStorageBlurModeName: currentBlurMode })
-    .then(() => {
-      console.log("Value is set to " + currentBlurMode);
-    });
+  chrome.storage.sync.set({ localStorageBlurModeName: currentBlurMode });
 }
 
 run();
@@ -55,7 +49,7 @@ async function run() {
 
   //Read current selected mode from localstorage
   const currentBlurMode = await readCurrentBlurModeFromStorage();
-  
+
   //Set the style of the current selected blur mode button
   setBlurMode(currentBlurMode);
 }

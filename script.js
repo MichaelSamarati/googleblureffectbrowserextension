@@ -19,6 +19,7 @@ run();
 //TODO: set at start border to leemnt or both at point so insured the same;
 var modeHasChanged = false;
 var currentBlurMode;
+var lastAnimationId;
 
 function run() {
   //get the google background element
@@ -87,6 +88,10 @@ async function executeMode(blurMode) {
   nonBlurCircleBorderElement.style.left = "0";
 
   //clean up stuff from old modes
+  //rect and random clean up
+  if (lastAnimationId) {
+    cancelAnimationFrame(lastAnimationId);
+  }
   //mouse mode clean up
   document.body.style.cursor = "auto";
   mouseListenerArea.removeEventListener(
@@ -170,9 +175,13 @@ function animateMovement(
   );
   let duration = (distance / distanceForOneSecond) * 1000;
   modeHasChanged = false;
-  requestAnimationFrame(animate);
+  lastAnimationId = requestAnimationFrame(animate);
   function animate(timestamp) {
     if (modeHasChanged) {
+      //rect and random clean up
+      if (lastAnimationId) {
+        cancelAnimationFrame(lastAnimationId);
+      }
       modeHasChanged = false;
       return;
     }
@@ -214,7 +223,7 @@ function animateMovement(
       );
       duration = (distance / distanceForOneSecond) * 1000;
     }
-    requestAnimationFrame(animate);
+    lastAnimationId = requestAnimationFrame(animate);
   }
 }
 
@@ -298,18 +307,14 @@ async function readCurrentBlurModeFromStorage() {
       chrome.storage.sync.get("localStorageBlurModeName", function (result) {
         resolve(result.localStorageBlurModeName);
       });
-    } catch (ex) {
-      reject(ex);
+    } catch (e) {
+      reject(e);
     }
   });
 }
 
 function writeCurrentBlurModeToStorage(currentBlurMode) {
-  chrome.storage.sync
-    .set({ localStorageBlurModeName: currentBlurMode })
-    .then(() => {
-      console.log("Value is set to " + currentBlurMode);
-    });
+  chrome.storage.sync.set({ localStorageBlurModeName: currentBlurMode });
 }
 
 chrome.runtime.onMessage.addListener(gotMessage);
