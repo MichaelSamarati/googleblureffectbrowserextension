@@ -5,27 +5,43 @@ const disabledBlurMode = "disabled";
 const defaultBlurMode = randomBlurMode;
 const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
-const storageblurmodename = "blurmode";
-const storagecirclesizename = "circlesize";
 const defaultCircleSize = 15;
+const defaultBlur = 5;
 const defaultBorderWidth = 6;
+const randomImageUrl = "https://source.unsplash.com/random";
 
-//TODO: Blur pixel
-//TODO: save picture at randm piucture extension
-//TODO: set at start border to leemnt or both at point so insured the same;
-//TODO: button hover color
+//TODO: reeadme guide how to use in chrome or link to how to use
+//TODO: comment everwhere
+//TODO: show with and without bloat remover
 
 var modeHasChanged = false;
-var currentBlurMode;
+var blurMode;
 var lastAnimationId;
 var circleSize = defaultCircleSize;
+var blur = defaultBlur;
 var borderWidth = defaultBorderWidth;
-
+var backgroundImageUrl;
+var listenToPopupMessages = false;
 run();
 
-function run() {
+async function run() {
   //get the google background element
   const mainElement = document.getElementsByClassName("L3eUgb")[0];
+
+  const backgroundImageUrl = await getRandomBackgroundImageUrl(randomImageUrl);
+  setBackgroundImageUrl(backgroundImageUrl);
+
+  listenToPopupMessages = true;
+
+  //randomBackgroundImage stuff
+  const randomBackgroundImageWrapper = document.createElement("div");
+  randomBackgroundImageWrapper.classList.add("random-background-image-wrapper");
+  randomBackgroundImageWrapper.classList.add("no-select");
+  randomBackgroundImageWrapper.innerHTML =
+    "<div class='random-background-image random-background-image-blur'></div>" +
+    "<div class='random-background-image random-background-image-normal'></div>";
+  mainElement.appendChild(randomBackgroundImageWrapper);
+
   //create an element that is the border of the non-blurred circle
   const nonBlurCircleBorderElement = document.createElement("div");
   nonBlurCircleBorderElement.classList.add(
@@ -44,26 +60,96 @@ function run() {
   //wait for non-blurred circle and afterwards start moving animation, so that the animations are in sync
   waitForElement(".random-background-image-normal").then(
     async (nonBlurCircleElement) => {
+      const blurFromStorage = await readBlurFromStorage();
+      updateBlur(blurFromStorage);
+
       //setting circle size of non blurred circle and border element of it
-      updateCircleSize(circleSize);
+      const circleSizeFromStorage = await readCircleSizeFromStorage();
+      updateCircleSize(circleSizeFromStorage);
 
       //positioning elements in center just in case animations don't work
-      nonBlurCircleBorderElement.style.top = `calc(50% - ${
-        circleSize / 2 + borderWidth
-      }px)`;
-      nonBlurCircleBorderElement.style.left = `calc(50% - ${
-        circleSize / 2 + borderWidth
-      }px)`;
+      const nonBlurCircleElementRect =
+        nonBlurCircleElement.getBoundingClientRect();
+      updateElementPositions(
+        {
+          x: nonBlurCircleElementRect.right / 2,
+          y: nonBlurCircleElementRect.bottom / 2,
+        },
+        nonBlurCircleElement,
+        nonBlurCircleBorderElement
+      );
 
-      const blurModeFromStorage = await readCurrentBlurModeFromStorage();
+      const blurModeFromStorage = await readBlurModeFromStorage();
       executeMode(blurModeFromStorage);
     }
   );
 }
 
+async function getRandomBackgroundImageUrl(randomImageUrl) {
+  const response = await fetch(randomImageUrl);
+  return response.url;
+}
+
+function setBackgroundImageUrl(newBackgroundImageUrl) {
+  backgroundImageUrl = newBackgroundImageUrl;
+  const root = document.querySelector(":root");
+  root.style.setProperty(
+    "--background-image-url",
+    `url(${backgroundImageUrl})`
+  );
+}
+
+async function downloadBackgroundImage(imageSrc) {
+  try {
+    const image = await fetch(imageSrc);
+    const imageBlob = await image.blob();
+    const imageURL = URL.createObjectURL(imageBlob);
+    const date = new Date();
+    const fileName =
+      fillWithLeadingZeros(date.getFullYear(), 4) +
+      "" +
+      fillWithLeadingZeros(date.getMonth() + 1, 2) +
+      "" +
+      fillWithLeadingZeros(date.getDate(), 2) +
+      " " +
+      fillWithLeadingZeros(date.getHours(), 2) +
+      "-" +
+      fillWithLeadingZeros(date.getMinutes(), 2) +
+      "-" +
+      fillWithLeadingZeros(date.getSeconds(), 2);
+    const link = document.createElement("a");
+    link.href = imageURL;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    console.log("Image download failed!");
+  }
+}
+
+function fillWithLeadingZeros(value, n) {
+  return ("0" + value).slice(-n);
+}
+
+function updateBlur(newBlur) {
+  if (!newBlur) {
+    blur = defaultBlur;
+  } else {
+    blur = newBlur;
+  }
+  const blurredBackgroundElement = document.getElementsByClassName(
+    "random-background-image-blur"
+  )[0];
+  blurredBackgroundElement.style.setProperty("--blur", `${blur}px`);
+}
+
 function updateCircleSize(newCircleSize) {
-  //update new circle sizes
-  circleSize = newCircleSize;
+  if (!newCircleSize) {
+    circleSize = defaultCircleSize;
+  } else {
+    circleSize = newCircleSize;
+  }
 
   //get necessary elements
   const nonBlurCircleElement = document.getElementsByClassName(
@@ -89,15 +175,17 @@ function updateCircleSize(newCircleSize) {
   );
 }
 
-async function executeMode(blurMode) {
-  if (blurMode !== currentBlurMode) {
+async function executeMode(newBlurMode) {
+  if (blurMode !== newBlurMode) {
     modeHasChanged = true;
-    currentBlurMode = blurMode;
+    blurMode = newBlurMode;
   } else {
     modeHasChanged = false;
     return;
   }
-
+  if (!blurMode) {
+    blurMode = defaultBlurMode;
+  }
   //get necessary elements
   const nonBlurCircleElement = document.getElementsByClassName(
     "random-background-image-normal"
@@ -327,11 +415,23 @@ function waitForElement(selector) {
   });
 }
 
-async function readCurrentBlurModeFromStorage() {
+async function writeBlurToStorage(blur) {
+  await chrome.storage.sync.set({ storageblurname: blur });
+}
+
+async function writeCircleSizeToStorage(circleSize) {
+  await chrome.storage.sync.set({ storagecirclesizename: circleSize });
+}
+
+async function writeBlurModeToStorage(blurMode) {
+  await chrome.storage.sync.set({ storageblurmodename: blurMode });
+}
+
+async function readBlurFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storageblurmodename"], function (result) {
-        resolve(result.storageblurmodename);
+      chrome.storage.sync.get(["storageblurname"], function (result) {
+        resolve(result.storageblurname);
       });
     } catch (e) {
       reject(e);
@@ -351,21 +451,33 @@ async function readCircleSizeFromStorage() {
   });
 }
 
-async function writeCurrentBlurModeToStorage(currentBlurMode) {
-  await chrome.storage.sync.set({ storageblurmodename: currentBlurMode });
-}
-
-async function writeCircleSizeToStorage(circleSize) {
-  await chrome.storage.sync.set({ storagecirclesizename: circleSize });
+async function readBlurModeFromStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(["storageblurmodename"], function (result) {
+        resolve(result.storageblurmodename);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
-  if (message.blurMode) {
-    executeMode(message.blurMode);
-  }
-  if (message.circleSize) {
-    updateCircleSize(message.circleSize);
+  if (listenToPopupMessages) {
+    if (message.blur) {
+      updateBlur(message.blur);
+    }
+    if (message.circleSize) {
+      updateCircleSize(message.circleSize);
+    }
+    if (message.blurMode) {
+      executeMode(message.blurMode);
+    }
+    if (message.download) {
+      downloadBackgroundImage(backgroundImageUrl);
+    }
   }
 }

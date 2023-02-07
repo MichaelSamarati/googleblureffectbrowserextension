@@ -1,7 +1,10 @@
 :root {
   --gap: 8px;
   --primary-color: rgb(32, 140, 255);
-  --background-color: #fff;
+  --primary-hover-color: rgb(0, 122, 253);
+  --secondary-color: rgb(240, 240, 240);
+  --secondary-hover-color: rgb(184, 184, 184);
+  --transition: all 50ms;
 }
 
 body {
@@ -29,7 +32,7 @@ body {
   display: flex;
   justify-content: center;
   font-family: 'Poppins', sans-serif;
-  color: var(--background-color);
+  color: var(--secondary-color);
   font-size: large;
 }
 
@@ -40,24 +43,8 @@ body {
   row-gap: var(--gap);
 }
 
-.selected-blur-mode-button {
-  width: 100%;
-  padding: 3px;
-  background-color: var(--primary-color);
-  font-family: 'Poppins', sans-serif;
-  border-radius: 3px;
-  border-width: 0 0 0 0;
-}
 
-.circle-size-button {
-  width: 100%;
-  padding: 3px;
-  font-family: 'Poppins', sans-serif;
-  border-radius: 3px;
-  border-width: 0 0 0 0;
-}
-
-.circle-size-slider-wrapper {
+.slider-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
@@ -66,20 +53,38 @@ body {
   transform: translateX(-2px);
 }
 
-.circle-size-slider {
+.slider {
   width: 100%;
   height: 100%;
   accent-color: var(--primary-color);
 }
 
-.circle-size-slider::-webkit-slider-runnable-track {}
+.slider::-webkit-slider-runnable-track {}
 
-.circle-size-slider::-webkit-slider-thumb {}
+.slider::-webkit-slider-thumb {}
 
-.blur-mode-button {
+.button {
   width: 100%;
   padding: 3px;
   font-family: 'Poppins', sans-serif;
   border-radius: 3px;
   border-width: 0 0 0 0;
+  background-color: var(--secondary-color);
+  transition: var(--transition);
+}
+
+.button:hover {
+  background-color: var(--secondary-hover-color);
+}
+
+.blur-button,
+.circle-size-button,
+.selected-blur-mode-button {
+  background-color: var(--primary-color);
+}
+
+.blur-button:hover,
+.circle-size-button:hover,
+.selected-blur-mode-button:hover {
+  background-color: var(--primary-hover-color);
 }

@@ -13,11 +13,33 @@
   <body>
     <div class="popup no-select">
       <div class="title" id="title">Blur Effect</div>
+      <button class="button download-button" id="download-button">
+        Download Image
+      </button>
       <div class="content-wrapper" id="content-wrapper">
-        <button class="circle-size-button" id="circle-size-button">Size</button>
-        <div class="circle-size-slider-wrapper" id="circle-size-slider-wrapper">
+        <button class="button blur-button" id="blur-button">Blur</button>
+        <div
+          class="slider-wrapper blur-slider-wrapper"
+          id="blur-slider-wrapper"
+        >
           <input
-            class="circle-size-slider"
+            class="slider blur-slider"
+            id="blur-slider"
+            type="range"
+            min="0"
+            max="20"
+            steps="1"
+          />
+        </div>
+        <button class="button circle-size-button" id="circle-size-button">
+          Size
+        </button>
+        <div
+          class="slider-wrapper circle-size-slider-wrapper"
+          id="circle-size-slider-wrapper"
+        >
+          <input
+            class="slider circle-size-slider"
             id="circle-size-slider"
             type="range"
             min="0"
@@ -25,16 +47,17 @@
             steps="1"
           />
         </div>
-        <button class="blur-mode-button" id="rect-blur-mode-button">
+
+        <button class="button blur-mode-button" id="rect-blur-mode-button">
           Rect
         </button>
-        <button class="blur-mode-button" id="random-blur-mode-button">
+        <button class="button blur-mode-button" id="random-blur-mode-button">
           Random
         </button>
-        <button class="blur-mode-button" id="mouse-blur-mode-button">
+        <button class="button blur-mode-button" id="mouse-blur-mode-button">
           Mouse
         </button>
-        <button class="blur-mode-button" id="disabled-blur-mode-button">
+        <button class="button blur-mode-button" id="disabled-blur-mode-button">
           Disabled
         </button>
       </div>
