@@ -59,10 +59,6 @@ body {
   accent-color: var(--primary-color);
 }
 
-.slider::-webkit-slider-runnable-track {}
-
-.slider::-webkit-slider-thumb {}
-
 .button {
   width: 100%;
   padding: 3px;
@@ -77,12 +73,14 @@ body {
   background-color: var(--secondary-hover-color);
 }
 
+.columns-button,
 .blur-button,
 .circle-size-button,
 .selected-blur-mode-button {
   background-color: var(--primary-color);
 }
 
+.columns-button:hover,
 .blur-button:hover,
 .circle-size-button:hover,
 .selected-blur-mode-button:hover {

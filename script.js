@@ -5,20 +5,22 @@ const disabledBlurMode = "disabled";
 const defaultBlurMode = randomBlurMode;
 const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
-const defaultCircleSize = 15;
+const defaultColumns = 3;
 const defaultBlur = 5;
+const defaultCircleSize = 15;
 const defaultBorderWidth = 6;
 const randomImageUrl = "https://source.unsplash.com/random";
 
 //TODO: reeadme guide how to use in chrome or link to how to use
 //TODO: comment everwhere
 //TODO: show with and without bloat remover
-
+//TODO: variable rename strage
 var modeHasChanged = false;
 var blurMode;
 var lastAnimationId;
-var circleSize = defaultCircleSize;
+var columns = defaultColumns;
 var blur = defaultBlur;
+var circleSize = defaultCircleSize;
 var borderWidth = defaultBorderWidth;
 var backgroundImageUrl;
 var listenToPopupMessages = false;
@@ -60,6 +62,9 @@ async function run() {
   //wait for non-blurred circle and afterwards start moving animation, so that the animations are in sync
   waitForElement(".random-background-image-normal").then(
     async (nonBlurCircleElement) => {
+      const columnsFromStorage = await readColumnsFromStorage();
+      updateColumns(columnsFromStorage);
+
       const blurFromStorage = await readBlurFromStorage();
       updateBlur(blurFromStorage);
 
@@ -142,6 +147,16 @@ function updateBlur(newBlur) {
     "random-background-image-blur"
   )[0];
   blurredBackgroundElement.style.setProperty("--blur", `${blur}px`);
+}
+
+function updateColumns(newColumns) {
+  if (!newColumns) {
+    columns = defaultColumns;
+  } else {
+    columns = newColumns;
+  }
+  const root = document.querySelector(":root");
+  root.style.setProperty("--background-size", `${100 / columns}%`);
 }
 
 function updateCircleSize(newCircleSize) {
@@ -415,6 +430,10 @@ function waitForElement(selector) {
   });
 }
 
+async function writeColumnsToStorage(columns) {
+  await chrome.storage.sync.set({ storagecolumnsname: columns });
+}
+
 async function writeBlurToStorage(blur) {
   await chrome.storage.sync.set({ storageblurname: blur });
 }
@@ -427,11 +446,39 @@ async function writeBlurModeToStorage(blurMode) {
   await chrome.storage.sync.set({ storageblurmodename: blurMode });
 }
 
+async function writeColumnsToStorage(columns) {
+  await chrome.storage.sync.set({ columns: columns });
+}
+
+async function writeBlurToStorage(blur) {
+  await chrome.storage.sync.set({ blur: blur });
+}
+
+async function writeCircleSizeToStorage(circleSize) {
+  await chrome.storage.sync.set({ circleSize: circleSize });
+}
+
+async function writeBlurModeToStorage(blurMode) {
+  await chrome.storage.sync.set({ blurMode: blurMode });
+}
+
+async function readColumnsFromStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(["columns"], function (result) {
+        resolve(result.columns);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 async function readBlurFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storageblurname"], function (result) {
-        resolve(result.storageblurname);
+      chrome.storage.sync.get(["blur"], function (result) {
+        resolve(result.blur);
       });
     } catch (e) {
       reject(e);
@@ -442,8 +489,8 @@ async function readBlurFromStorage() {
 async function readCircleSizeFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storagecirclesizename"], function (result) {
-        resolve(result.storagecirclesizename);
+      chrome.storage.sync.get(["circleSize"], function (result) {
+        resolve(result.circleSize);
       });
     } catch (e) {
       reject(e);
@@ -454,8 +501,8 @@ async function readCircleSizeFromStorage() {
 async function readBlurModeFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storageblurmodename"], function (result) {
-        resolve(result.storageblurmodename);
+      chrome.storage.sync.get(["blurMode"], function (result) {
+        resolve(result.blurMode);
       });
     } catch (e) {
       reject(e);
@@ -469,6 +516,9 @@ function gotMessage(message, sender, sendResponse) {
   if (listenToPopupMessages) {
     if (message.blur) {
       updateBlur(message.blur);
+    }
+    if (message.columns) {
+      updateColumns(message.columns);
     }
     if (message.circleSize) {
       updateCircleSize(message.circleSize);

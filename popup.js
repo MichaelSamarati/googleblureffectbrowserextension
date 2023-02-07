@@ -22,33 +22,52 @@ const blurModeButtons = [
   },
 ];
 const downloadButtonClass = "download-button";
+const columnsSliderClass = "columns-slider";
+const columnsButtonClass = "columns-button";
 const blurSliderClass = "blur-slider";
 const blurButtonClass = "blur-button";
 const circleSizeSliderClass = "circle-size-slider";
 const circleSizeButtonClass = "circle-size-button";
 const blurModeButtonClass = "blur-mode-button";
 const selectedBlurModeButtonClass = "selected-blur-mode-button";
-const defaultCircleSize = 15;
+const defaultColumns = 3;
 const defaultBlur = 5;
+const defaultCircleSize = 15;
 const defaultBorderWidth = 6;
 
+async function writeColumnsToStorage(columns) {
+  await chrome.storage.sync.set({ columns: columns });
+}
+
 async function writeBlurToStorage(blur) {
-  await chrome.storage.sync.set({ storageblurname: blur });
+  await chrome.storage.sync.set({ blur: blur });
 }
 
 async function writeCircleSizeToStorage(circleSize) {
-  await chrome.storage.sync.set({ storagecirclesizename: circleSize });
+  await chrome.storage.sync.set({ circleSize: circleSize });
 }
 
 async function writeBlurModeToStorage(blurMode) {
-  await chrome.storage.sync.set({ storageblurmodename: blurMode });
+  await chrome.storage.sync.set({ blurMode: blurMode });
+}
+
+async function readColumnsFromStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(["columns"], function (result) {
+        resolve(result.columns);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
 async function readBlurFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storageblurname"], function (result) {
-        resolve(result.storageblurname);
+      chrome.storage.sync.get(["blur"], function (result) {
+        resolve(result.blur);
       });
     } catch (e) {
       reject(e);
@@ -59,8 +78,8 @@ async function readBlurFromStorage() {
 async function readCircleSizeFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storagecirclesizename"], function (result) {
-        resolve(result.storagecirclesizename);
+      chrome.storage.sync.get(["circleSize"], function (result) {
+        resolve(result.circleSize);
       });
     } catch (e) {
       reject(e);
@@ -71,8 +90,8 @@ async function readCircleSizeFromStorage() {
 async function readBlurModeFromStorage() {
   return new Promise((resolve, reject) => {
     try {
-      chrome.storage.sync.get(["storageblurmodename"], function (result) {
-        resolve(result.storageblurmodename);
+      chrome.storage.sync.get(["blurMode"], function (result) {
+        resolve(result.blurMode);
       });
     } catch (e) {
       reject(e);
@@ -87,6 +106,17 @@ async function run() {
   downloadButton.addEventListener("click", function (e) {
     downloadBackgroundImage();
   });
+
+  const columnsSlider = document.getElementById(columnsSliderClass);
+  columnsSlider.addEventListener("change", function (e) {
+    setColumns(e.target.value);
+  });
+  const columnsButton = document.getElementById(columnsButtonClass);
+  columnsButton.addEventListener("click", function (e) {
+    setColumns(defaultColumns);
+  });
+  const currentColumns = await readColumnsFromStorage();
+  setColumns(currentColumns);
 
   const blurSlider = document.getElementById(blurSliderClass);
   blurSlider.addEventListener("change", function (e) {
@@ -107,8 +137,6 @@ async function run() {
   circleSizeButton.addEventListener("click", function (e) {
     setCircleSize(defaultCircleSize);
   });
-
-  //Read circle size from storage
   const currentCircleSize = await readCircleSizeFromStorage();
   setCircleSize(currentCircleSize);
 
@@ -135,6 +163,18 @@ function downloadBackgroundImage() {
   sendToContentScript(msg);
 }
 
+function setColumns(columns) {
+  if (!columns) {
+    columns = defaultColumns;
+  }
+  const columnsSlider = document.getElementById(columnsSliderClass);
+  const columnsButton = document.getElementById(columnsButtonClass);
+  columnsSlider.value = columns;
+  columnsButton.textContent = "Columns: " + columns;
+  writeColumnsToStorage(columns);
+  sendToContentScript({ columns: columns });
+}
+
 function setBlur(blur) {
   if (!blur) {
     blur = defaultBlur;
@@ -144,8 +184,7 @@ function setBlur(blur) {
   blurSlider.value = blur;
   blurButton.textContent = "Blur: " + blur + "px";
   writeBlurToStorage(blur);
-  let msg = { blur: blur };
-  sendToContentScript(msg);
+  sendToContentScript({ blur: blur });
 }
 
 function setCircleSize(circleSize) {
@@ -157,8 +196,7 @@ function setCircleSize(circleSize) {
   circleSizeSlider.value = circleSize;
   circleSizeButton.textContent = "Size: " + circleSize + "%";
   writeCircleSizeToStorage(circleSize);
-  let msg = { circleSize: circleSize };
-  sendToContentScript(msg);
+  sendToContentScript({ circleSize: circleSize });
 }
 
 function setBlurMode(blurMode) {
@@ -176,15 +214,14 @@ function setBlurMode(blurMode) {
         .getElementById(e.buttonId)
         .classList.add(selectedBlurModeButtonClass);
       writeBlurModeToStorage(blurMode);
-      let msg = { blurMode: blurMode };
-      sendToContentScript(msg);
+      sendToContentScript({ blurMode: blurMode });
     }
   });
 }
 
 function sendToContentScript(msg) {
   try {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) =>
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) =>
       tabs.forEach((tab) => {
         try {
           chrome.tabs.sendMessage(tab.id, msg);
