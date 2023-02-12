@@ -3,8 +3,6 @@ const randomBlurMode = "random";
 const mouseBlurMode = "mouse";
 const disabledBlurMode = "disabled";
 const defaultBlurMode = randomBlurMode;
-const blurModeButtonClass = "blur-mode-button";
-const selectedBlurModeButtonClass = "selected-blur-mode-button";
 const defaultColumns = 3;
 const defaultBlur = 5;
 const defaultCircleSize = 15;
@@ -14,16 +12,19 @@ const randomImageUrl = "https://source.unsplash.com/random";
 //TODO: reeadme guide how to use in chrome or link to how to use
 //TODO: comment everwhere
 //TODO: show with and without bloat remover
-//TODO: variable rename strage
+//TODO: blur 0px do black
+//TODO: popup design
+//TODO: if size 0px; then maybe no border ; and maybve different border sizes;
+var listenToPopupMessages = false;
 var modeHasChanged = false;
-var blurMode;
 var lastAnimationId;
+var backgroundImageUrl;
 var columns = defaultColumns;
 var blur = defaultBlur;
 var circleSize = defaultCircleSize;
 var borderWidth = defaultBorderWidth;
-var backgroundImageUrl;
-var listenToPopupMessages = false;
+var blurMode;
+
 run();
 
 async function run() {
