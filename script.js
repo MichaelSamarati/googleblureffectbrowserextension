@@ -129,7 +129,7 @@ async function downloadBackgroundImage(imageSrc) {
       fillWithLeadingZeros(date.getMinutes(), 2) +
       "-" +
       fillWithLeadingZeros(date.getSeconds(), 2) +
-      +" Blur-Effect-Google-Chrome-Extension";
+      " Blur-Effect-Google-Chrome-Extension";
     const link = document.createElement("a");
     link.href = imageURL;
     link.download = fileName;
