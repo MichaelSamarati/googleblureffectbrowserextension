@@ -15,6 +15,12 @@ const randomImageUrl = "https://source.unsplash.com/random";
 //TODO: blur 0px do black
 //TODO: popup design
 //TODO: if size 0px; then maybe no border ; and maybve different border sizes;
+//TODO: Remove wait for element
+//TODO: In viewport change size change update circle size blue effect:
+//TODO: Fix default mode on no mode selected first time
+//TODO:: kann man nicht body mouse listener mwschen
+//TODO: add to filename soem string to be able top filter doiwnloadsfolder with string,
+//TODO: line for movement mode; so just left right ight left in middle of scrrenen;
 var listenToPopupMessages = false;
 var modeHasChanged = false;
 var lastAnimationId;
@@ -122,7 +128,8 @@ async function downloadBackgroundImage(imageSrc) {
       "-" +
       fillWithLeadingZeros(date.getMinutes(), 2) +
       "-" +
-      fillWithLeadingZeros(date.getSeconds(), 2);
+      fillWithLeadingZeros(date.getSeconds(), 2) +
+      +" Blur-Effect-Google-Chrome-Extension";
     const link = document.createElement("a");
     link.href = imageURL;
     link.download = fileName;
