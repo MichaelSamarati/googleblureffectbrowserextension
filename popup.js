@@ -21,7 +21,6 @@ const blurModeButtons = [
     buttonId: "disabled-blur-mode-button",
   },
 ];
-const downloadButtonClass = "download-button";
 const columnsSliderClass = "columns-slider";
 const columnsButtonClass = "columns-button";
 const blurSliderClass = "blur-slider";
@@ -102,11 +101,6 @@ async function readBlurModeFromStorage() {
 run();
 
 async function run() {
-  const downloadButton = document.getElementById(downloadButtonClass);
-  downloadButton.addEventListener("click", function (e) {
-    downloadBackgroundImage();
-  });
-
   const columnsSlider = document.getElementById(columnsSliderClass);
   columnsSlider.addEventListener("change", function (e) {
     setColumns(e.target.value);
@@ -156,11 +150,6 @@ function addClickListenersToBlurModeButtons(blurModeButtons) {
       setBlurMode(e.blurMode);
     });
   });
-}
-
-function downloadBackgroundImage() {
-  const msg = { download: "download" };
-  sendToContentScript(msg);
 }
 
 function setColumns(columns) {

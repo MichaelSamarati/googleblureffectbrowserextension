@@ -7,20 +7,10 @@ const defaultColumns = 3;
 const defaultBlur = 5;
 const defaultCircleSize = 15;
 const defaultBorderWidth = 6;
-const randomImageUrl = "https://source.unsplash.com/random";
+//const randomImageUrl = "https://source.unsplash.com/random";
+const randomImageUrl =
+  "https://random-image-pepebigotes.vercel.app/api/random-image";
 
-//TODO: reeadme guide how to use in chrome or link to how to use
-//TODO: comment everwhere
-//TODO: show with and without bloat remover
-//TODO: blur 0px do black
-//TODO: popup design
-//TODO: if size 0px; then maybe no border ; and maybve different border sizes;
-//TODO: Remove wait for element
-//TODO: In viewport change size change update circle size blue effect:
-//TODO: Fix default mode on no mode selected first time
-//TODO:: kann man nicht body mouse listener mwschen
-//TODO: add to filename soem string to be able top filter doiwnloadsfolder with string,
-//TODO: line for movement mode; so just left right ight left in middle of scrrenen;
 var listenToPopupMessages = false;
 var modeHasChanged = false;
 var lastAnimationId;
@@ -37,8 +27,9 @@ async function run() {
   //get the google background element
   const mainElement = document.getElementsByClassName("L3eUgb")[0];
 
-  const backgroundImageUrl = await getRandomBackgroundImageUrl(randomImageUrl);
-  setBackgroundImageUrl(backgroundImageUrl);
+  setBackgroundImage(chrome.runtime.getURL("/img/default_background.jpg"));
+
+  setBackgroundImage(randomImageUrl);
 
   listenToPopupMessages = true;
 
@@ -97,12 +88,7 @@ async function run() {
   );
 }
 
-async function getRandomBackgroundImageUrl(randomImageUrl) {
-  const response = await fetch(randomImageUrl);
-  return response.url;
-}
-
-function setBackgroundImageUrl(newBackgroundImageUrl) {
+function setBackgroundImage(newBackgroundImageUrl) {
   backgroundImageUrl = newBackgroundImageUrl;
   const root = document.querySelector(":root");
   root.style.setProperty(
@@ -111,39 +97,6 @@ function setBackgroundImageUrl(newBackgroundImageUrl) {
   );
 }
 
-async function downloadBackgroundImage(imageSrc) {
-  try {
-    const image = await fetch(imageSrc);
-    const imageBlob = await image.blob();
-    const imageURL = URL.createObjectURL(imageBlob);
-    const date = new Date();
-    const fileName =
-      fillWithLeadingZeros(date.getFullYear(), 4) +
-      "" +
-      fillWithLeadingZeros(date.getMonth() + 1, 2) +
-      "" +
-      fillWithLeadingZeros(date.getDate(), 2) +
-      " " +
-      fillWithLeadingZeros(date.getHours(), 2) +
-      "-" +
-      fillWithLeadingZeros(date.getMinutes(), 2) +
-      "-" +
-      fillWithLeadingZeros(date.getSeconds(), 2) +
-      " Blur-Effect-Google-Chrome-Extension";
-    const link = document.createElement("a");
-    link.href = imageURL;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (e) {
-    console.log("Image download failed!");
-  }
-}
-
-function fillWithLeadingZeros(value, n) {
-  return ("0" + value).slice(-n);
-}
 
 function updateBlur(newBlur) {
   if (!newBlur) {
@@ -533,9 +486,6 @@ function gotMessage(message, sender, sendResponse) {
     }
     if (message.blurMode) {
       executeMode(message.blurMode);
-    }
-    if (message.download) {
-      downloadBackgroundImage(backgroundImageUrl);
     }
   }
 }

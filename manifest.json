@@ -19,9 +19,16 @@
       "run_at": "document_end"
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["img/default_background.jpg"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "action": {
     "default_title": "Blur Effect Popup",
     "default_popup": "popup.html"
   },
-  "permissions": ["activeTab", "tabs", "contextMenus", "storage"]
+  "permissions": [ "activeTab", "tabs", "contextMenus", "storage"],
+  "host_permissions": ["http://*/*", "https://*/*"]
 }
